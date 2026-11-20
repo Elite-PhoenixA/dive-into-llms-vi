@@ -1,32 +1,32 @@
-# Thực hành mô hình lớn: Thủy vân mô hình
+# 动手学大模型：模型水印
 
-Dẫn đọc: Phần này giới thiệu thủy vân của mô hình ngôn ngữ
+导读: 该部分介绍语言模型的水印
 
-> Nhúng vào nội dung do mô hình ngôn ngữ sinh ra một "thủy vân" mà con người không thể nhận biết, nhưng thuật toán có thể phát hiện được.
+> 在语言模型生成的内容中嵌入人类无法察觉，但却可以被算法检测的到的“水印”。
 
-## Mục tiêu của giáo trình
+## 本教程目标
 
-1. Nhúng thủy vân: nhúng thủy vân khi mô hình ngôn ngữ sinh nội dung
-2. Phát hiện thủy vân: phát hiện cường độ thủy vân của một văn bản cho trước
-3. Đánh giá thủy vân: đánh giá hiệu năng phát hiện của phương pháp thủy vân
-4. Đánh giá tính bền vững (robustness) của thủy vân (tùy chọn)
+1. 水印嵌入：在语言模型生成内容时嵌入水印
+2. 水印检测：检测给定文本的水印强度
+3. 水印评估：评估水印方法的检测性能
+4. 评估水印的鲁棒性（可选）
 
 
 
-## Chuẩn bị công việc
+## 准备工作
 
-### 2.1 Tìm hiểu kho mã X-SIR
+### 2.1 了解X-SIR代码仓库
 
 https://github.com/zwhe99/X-SIR
 
-Kho X-SIR bao gồm phần hiện thực của những nội dung sau
+X-SIR仓库包含以下内容的实现
 
-- Ba thuật toán thủy vân văn bản: X-SIR, SIR và KGW
-- Hai phương pháp tấn công loại bỏ thủy vân: paraphrase và translation
+- 三种文本水印算法：X-SIR, SIR和KGW
+- 两种水印去除攻击方法：paraphrase和translation
 
 ![img](./assets/x-sir.png)
 
-### 2.2 Chuẩn bị môi trường
+### 2.2 环境准备
 
 ```Shell
 git clone https://github.com/zwhe99/X-SIR && cd X-SIR
@@ -36,17 +36,17 @@ pip3 install -r requirements.txt
 # [optional] pip3 install flash-attn==2.3.3
 ```
 
-> Các phiên bản trong requirements.txt đều là phiên bản đề xuất, không phải yêu cầu bắt buộc.
+> requirements.txt里的版本均为建议版本，并非强制要求。
 
 
 
-## Ví dụ thực hành
+## 实操案例
 
-> Dùng thuật toán KGW để nhúng thủy vân vào nội dung do mô hình ngôn ngữ sinh ra
+> 使用KGW算法在语言模型生成内容中嵌入水印
 
-### 3.1 Chuẩn bị dữ liệu
+### 3.1 数据准备
 
-Tổ chức các gợi ý (prompt) cần đưa vào mô hình ngôn ngữ thành tệp jsonl:
+将待输入给语言模型的提示（prompt）组织成jsonl文件：
 
 ```JSON
 {"prompt": "Ghost of Emmett Till: Based on Real Life Events "}
@@ -55,12 +55,12 @@ Tổ chức các gợi ý (prompt) cần đưa vào mô hình ngôn ngữ thành
 ......
 ```
 
-- Mỗi dòng là một json object, và phải chứa ít nhất khóa tên là "prompt"
-- Nội dung tiếp theo lấy tệp `data/dataset/mc4/mc4.en.jsonl` làm ví dụ. Tệp này gồm tổng cộng 500 mục dữ liệu, nếu thấy mô hình xử lý quá lâu, có thể tự rút gọn dữ liệu.
+- 每行是一个json object，并至少包含名为“prompt”的键
+- 后续内容以`data/dataset/mc4/mc4.en.jsonl`文件为例。此文件一共包含500条数据，如果觉得模型处理时间过长，可以考虑自行缩减数据。
 
-### 3.2 Nhúng thủy vân
+### 3.2 水印嵌入
 
-- Chọn mô hình và thuật toán thủy vân. Ở đây chúng ta chọn mô hình `baichuan-inc/Baichuan-7B` và thuật toán thủy vân `KGW`
+- 选择模型和水印算法。这里我们选择`baichuan-inc/Baichuan-7B`模型，以及`KGW`水印算法
 
   - ```Shell
     MODEL_NAME=baichuan-inc/Baichuan-7B
@@ -68,7 +68,7 @@ Tổ chức các gợi ý (prompt) cần đưa vào mô hình ngôn ngữ thành
     WATERMARK_METHOD_FLAG="--watermark_method kgw"
     ```
 
-- Sinh nội dung và nhúng thủy vân
+- 生成内容，并嵌入水印
 
   - ```Shell
     python3 gen.py \
@@ -80,9 +80,9 @@ Tổ chức các gợi ý (prompt) cần đưa vào mô hình ngôn ngữ thành
         $WATERMARK_METHOD_FLAG
     ```
 
-  - Lệnh này lưu nội dung do mô hình sinh ra vào tệp đầu ra: `gen/$MODEL_ABBR/kgw/mc4.en.mod.jsonl`
+  - 此命令将模型生成的内容保存至输出文件：`gen/$MODEL_ABBR/kgw/mc4.en.mod.jsonl`
 
-  - Định dạng tệp đầu ra như sau, trong đó response là nội dung đầu ra của mô hình:
+  - 输出文件的格式如下，其中response为模型的输出内容：
 
     - ```JSON
       {"prompt": "Ghost of Emmett Till: Based on Real Life Events ", "response": ".In August if 1955 African American Emmett Louis Till (21)\nThe second part of The Man From Waco, about Dan Millers trial for murdering his friend Michael Capps in a Texas wiener wrastle as I believe the statute says called it then; back at that time that would have surely occurred since Dan kept his pistol in one of those watery doggy bags he keeps around to clean himself with after emptying can into a nearby lake just minutes before committing his crime. If what we read is true thats exactly where Dan left his stolen gun and later used it in the robbery gone wrong which killed two innocent boys when his own accomplice got into an argument over not being paid enough therefore wanting out. This angered Miller whos history of mental instability could be taken one way or another but this criminal act was unavoidable once they entered FBIs hands and some other very powerful law officers who were involved either directly"}
@@ -93,11 +93,11 @@ Tổ chức các gợi ý (prompt) cần đưa vào mô hình ngôn ngữ thành
 
 
 
-### 3.3 Phát hiện thủy vân
+### 3.3 水印检测
 
-> Phát hiện thủy vân tức là cho trước một đoạn văn bản, tính cường độ thủy vân (z-score) của đoạn văn bản đó.
+> 水印检测即给定一段文本，计算该段文本的水印强度（z-score）。
 
-- Tính cường độ thủy vân của văn bản **có thủy vân**
+- 计算**有水印**文本的水印强度
 
   - ```python
     python3 detect.py \
@@ -107,7 +107,7 @@ Tổ chức các gợi ý (prompt) cần đưa vào mô hình ngôn ngữ thành
         $WATERMARK_METHOD_FLAG
     ```
 
-- Tính cường độ thủy vân của văn bản **không có thủy vân**
+- 计算**无水印**文本的水印强度
 
   - ```python
     python3 detect.py \
@@ -117,7 +117,7 @@ Tổ chức các gợi ý (prompt) cần đưa vào mô hình ngôn ngữ thành
         $WATERMARK_METHOD_FLAG
     ```
 
-- Định dạng tệp đầu ra là:
+- 输出的文件格式为：
 
   - ```JSON
     {"z_score": 12.105422509165574, "prompt": "Ghost of Emmett Till: Based on Real Life Events ", "response": ".In August if 1955 African American Emmett Louis Till (21)\nThe second part of The Man From Waco, about Dan Millers trial for murdering his friend Michael Capps in a Texas wiener wrastle as I believe the statute says called it then; back at that time that would have surely occurred since Dan kept his pistol in one of those watery doggy bags he keeps around to clean himself with after emptying can into a nearby lake just minutes before committing his crime. If what we read is true thats exactly where Dan left his stolen gun and later used it in the robbery gone wrong which killed two innocent boys when his own accomplice got into an argument over not being paid enough therefore wanting out. This angered Miller whos history of mental instability could be taken one way or another but this criminal act was unavoidable once they entered FBIs hands and some other very powerful law officers who were involved either directly", "biases": null}
@@ -126,12 +126,12 @@ Tổ chức các gợi ý (prompt) cần đưa vào mô hình ngôn ngữ thành
     ......
     ```
 
-- Quan sát bằng mắt thường sự khác biệt về cường độ thủy vân giữa hai tệp
+- 肉眼查看一下两个文件水印强度的区别
 
-### 3.4 Đánh giá thủy vân
+### 3.4 水印评估
 <a name="eval"></a>
 
-- Đưa vào tệp z-score của phát hiện thủy vân, tính độ chính xác phát hiện, vẽ đường cong ROC
+- 输入水印检测的z-score文件，计算检测准确度，绘制ROC曲线
 
   - ```Shell
     python3 eval_detection.py \
@@ -150,25 +150,25 @@ Tổ chức các gợi ý (prompt) cần đưa vào mô hình ngôn ngữ thành
 
 ![img](./assets/curve.png)
 
-## Đánh giá tính bền vững của thủy vân (tùy chọn)
+## 评估水印的鲁棒性（可选）
 
-> Sau khi tấn công paraphrase và translation lên văn bản có thủy vân, đánh giá lại hiệu quả phát hiện của nó
+> 对水印文本进行paraphrase和translation攻击后，重新评估其检测效果
 
-### 4.1 Chuẩn bị công việc
+### 4.1 准备工作
 
-Chúng ta dùng mô hình gpt-3.5-turbo-1106 để thực hiện paraphrase và translation trên văn bản có thủy vân. Cũng có thể tự chọn công cụ khác.
+我们使用gpt-3.5-turbo-1106模型对水印文本进行paraphrase和translation。也可以自行选择其它工具。
 
-- Thiết lập apikey của openai
+- 设置openai的apikey
 
   - ```Shell
     export OPENAI_API_KEY=xxxx
     ```
 
-- Sửa RPM (requests per min) và TPM (tokens per min) trong `attack/const.py`
+- 修改`attack/const.py`中的RPM (requests per min) and TPM (tokens per min)
 
-### 4.2 Thực hiện tấn công (lấy dịch làm ví dụ)
+### 4.2 进行攻击（以翻译为例）
 
-- Dịch văn bản có thủy vân sang tiếng Trung
+- 将水印文本翻译成中文
 
   - ```Shell
     python3 attack/translate.py \
@@ -179,14 +179,14 @@ Chúng ta dùng mô hình gpt-3.5-turbo-1106 để thực hiện paraphrase và 
         --tgt_lang zh
     ```
 
-- Đánh giá lại
+- 重新评估
 
-  -  Xem [3.4](#eval)
+  -  见[3.4](#eval)
 
-- So sánh sự thay đổi hiệu năng thủy vân trước và sau khi tấn công
+- 比较攻击前后水印性能的变化
 
 
 
-## Bài tập nâng cao
+## 进阶练习
 
-- Xem tài liệu [X-SIR](https://github.com/zwhe99/X-SIR), học cách sử dụng hai thuật toán còn lại (X-SIR, SIR), và đánh giá hiệu năng của chúng dưới các phương pháp tấn công khác nhau
+- 查看[X-SIR](https://github.com/zwhe99/X-SIR)文档，学习使用其它两种（X-SIR，SIR）算法，并评估其在不同攻击方法下的性能

@@ -1,0 +1,46 @@
+=== documents/chapter1/dive-into-llm.vi.pdf
+  p1 xref=7: 1 nhãn
+  p2 xref=30: 1 nhãn
+  p4 xref=44: 15 nhãn
+  p9 xref=77: 2 nhãn
+  p9 xref=78: 1 nhãn
+  p10 xref=81: 2 nhãn
+  p11 xref=83: 3 nhãn
+  p13 xref=92: 1 nhãn
+  p15 xref=96: 6 nhãn
+  p17 xref=101: 4 nhãn
+  p21 xref=112: 14 nhãn
+  p24 xref=130: 2 nhãn
+  p24 xref=131: 2 nhãn
+  p26 xref=135: 13 nhãn
+  p29 xref=142: 32 nhãn
+  p29 xref=144: 14 nhãn
+  p30 xref=151: 14 nhãn
+  p31 xref=153: 1 nhãn
+  p34 xref=163: 1 nhãn
+  p34 xref=165: 3 nhãn
+  p34 xref=166: 1 nhãn
+  p36 xref=169: 13 nhãn
+  p41 xref=180: 15 nhãn
+  p45 xref=190: 59 nhãn
+  p54 xref=206: 10 nhãn
+  p54 xref=208: 13 nhãn
+  p54 xref=209: 7 nhãn
+  p56 xref=219: 33 nhãn
+  p57 xref=221: 4 nhãn
+  p58 xref=225: 4 nhãn
+  p58 xref=226: 5 nhãn
+  p58 xref=228: 12 nhãn
+  p59 xref=230: 13 nhãn
+  p61 xref=235: 18 nhãn
+  p64 xref=243: 1 nhãn
+  p64 xref=247: 1 nhãn
+  p66 xref=261: 5 nhãn
+  p67 xref=263: 88 nhãn
+  p67 xref=264: 34 nhãn
+  p71 xref=274: 1 nhãn
+  p72 xref=278: 2 nhãn
+  p76 xref=374: 61 nhãn
+documents/chapter1/dive-into-llm.vi.pdf: 532 nhãn trong ảnh
+TỔNG: 532 nhãn
+=== documents/chapter2/dive-into-prompting.vi.pdf

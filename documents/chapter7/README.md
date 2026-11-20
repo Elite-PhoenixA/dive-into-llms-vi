@@ -1,85 +1,85 @@
-# LLM文本隐写术
+# Steganography trong văn bản bằng LLM
 
-本项目实现了基于大型语言模型（LLM）的文本隐写术，使用GPT-2模型在生成的文本中隐藏信息。项目包含两种编码方法：霍夫曼编码（Huffman Coding）和固定长度编码（Fixed Length Coding, FLC）。
+Dự án này hiện thực steganography trong văn bản dựa trên LLM (LLM), sử dụng mô hình GPT-2 để giấu thông tin trong văn bản được sinh ra. Dự án gồm hai phương pháp mã hóa: mã hóa Huffman (Huffman Coding) và mã hóa độ dài cố định (Fixed Length Coding, FLC).
 
-## 功能特点
+## Đặc điểm chức năng
 
-- 在GPT-2文本生成中实现隐写术
-- 支持两种编码方法：
-  - 霍夫曼编码（Huffman Coding）
-  - 固定长度编码（Fixed Length Coding, FLC）
-- 同时生成隐写文本和普通文本用于对比
+- Hiện thực steganography trong quá trình sinh văn bản của GPT-2
+- Hỗ trợ hai phương pháp mã hóa:
+  - Mã hóa Huffman (Huffman Coding)
+  - Mã hóa độ dài cố định (Fixed Length Coding, FLC)
+- Đồng thời sinh văn bản giấu tin và văn bản thường để so sánh
 
-## 环境要求
+## Yêu cầu môi trường
 
 - Python 3.8+
 - PyTorch
 - Transformers
-- CUDA（可选，用于GPU加速）
+- CUDA (tùy chọn, dùng để tăng tốc bằng GPU)
 
-## 安装步骤
+## Các bước cài đặt
 
-安装依赖包：
+Cài đặt các gói phụ thuộc:
 
 ```bash
-pip install torch # 如果是GPU，注意指定torch是GPU版本
+pip install torch # Nếu dùng GPU, lưu ý chỉ định torch là bản GPU
 pip install transformers
 pip install jupyter
 ```
 
-## 使用方法
+## Cách sử dụng
 
-1. 打开Jupyter notebook：
+1. Mở Jupyter notebook:
 ```bash
 jupyter notebook llm_stega.ipynb
 ```
 
-2. notebook包含三个主要部分：
-   - 霍夫曼编码实现
-   - 固定长度编码（FLC）实现
-   - 文本生成与隐写
+2. Notebook gồm ba phần chính:
+   - Hiện thực mã hóa Huffman
+   - Hiện thực mã hóa độ dài cố định (FLC)
+   - Sinh văn bản và giấu tin
 
-3. 生成隐写文本：
-   - 选择编码方法（霍夫曼编码或FLC）
-   - 设置参数（编码的k值）
-   - 使用自定义提示词运行主函数
+3. Sinh văn bản giấu tin:
+   - Chọn phương pháp mã hóa (mã hóa Huffman hoặc FLC)
+   - Thiết lập tham số (giá trị k của mã hóa)
+   - Chạy hàm chính với prompt tùy chỉnh
 
-示例代码：
+Mã ví dụ:
 ```python
-# 初始化隐写处理器
+# Khởi tạo bộ xử lý giấu tin
 k = 2
 handle = Huffman(k=2**k, bits=bits)
-# 或者使用FLC
+# Hoặc sử dụng FLC
 # handle = FLC(k=k, bits=bits)
 
-# 生成带隐写的文本
+# Sinh văn bản có giấu tin
 prompt = "Hello，I'm"
 stega_output, normal_output = generate_text_with_steganography(
     model, tokenizer, prompt, handle
 )
 ```
 
-## 输出文件
+## Tệp đầu ra
 
-程序会生成两个文本文件：
-- `outputs-gpt2-stega.txt`：隐写文本
-- `outputs-gpt2-normal.txt`：没有隐写约束情况下原本正常生成的文本
+Chương trình sẽ sinh ra hai tệp văn bản:
+- `outputs-gpt2-stega.txt`: văn bản có giấu tin
+- `outputs-gpt2-normal.txt`: văn bản vốn được sinh bình thường khi không có ràng buộc giấu tin
 
-## 注意事项
+## Lưu ý
 
-- GPT-2模型会在首次运行时自动下载，国内也可以先通过https://hf-mirror.com 镜像下载好GPT-2模型，也可以使用其他大模型。
-- 确保有足够的磁盘空间（模型约500MB）
-- 建议使用支持CUDA的GPU以获得更好的性能
-- 隐写信息长度会影响生成的文本长度
+- Mô hình GPT-2 sẽ tự động được tải xuống trong lần chạy đầu tiên, trong nước cũng có thể tải sẵn mô hình GPT-2 qua mirror https://hf-mirror.com, hoặc dùng LLM khác.
+- Đảm bảo có đủ dung lượng ổ đĩa (mô hình khoảng 500MB)
+- Khuyến nghị dùng GPU hỗ trợ CUDA để có hiệu năng tốt hơn
+- Độ dài thông tin giấu sẽ ảnh hưởng đến độ dài văn bản được sinh ra
 
-## 工作原理
+## Nguyên lý hoạt động
 
-1. 隐写过程：
-   - 将秘密信息转换为二进制序列
-   - 使用GPT-2模型生成文本
-   - 通过编码方法将信息位嵌入到生成的文本中
+1. Quá trình giấu tin:
+   - Chuyển thông tin mật thành chuỗi nhị phân
+   - Dùng mô hình GPT-2 để sinh văn bản
+   - Nhúng các bit thông tin vào văn bản được sinh ra thông qua phương pháp mã hóa
 
-2. 解码过程：
-   - 使用相同的GPT-2模型和上下文
-   - 通过解码方法从文本中提取隐藏的信息位
-   - 将二进制序列转换回原始信息
+2. Quá trình giải mã:
+   - Dùng cùng mô hình GPT-2 và ngữ cảnh
+   - Trích xuất các bit thông tin ẩn từ văn bản thông qua phương pháp giải mã
+   - Chuyển chuỗi nhị phân trở lại thông tin ban đầu

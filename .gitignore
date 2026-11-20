@@ -1,1 +1,5 @@
 .DS_Store
+
+# công cụ dịch PDF (tạo cục bộ)
+.venv-pdf/
+tools/pdf_vi/cache/

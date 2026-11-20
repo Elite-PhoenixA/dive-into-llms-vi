@@ -1,23 +1,23 @@
-# 动手学大模型：GUI智能体构建
-## 本教程目标
-1.了解GUI智能体领域的技术路线和研究现状
+# Thực hành LLM: Xây dựng agent GUI
+## Mục tiêu của giáo trình
+1. Hiểu các hướng kỹ thuật và hiện trạng nghiên cứu trong lĩnh vực agent GUI
 
-2.尝试基于开源模型Qwen2-VL-7B依托OS-Kairos数据集构建自适应人机交互GUI智能体的方法
+2. Thử phương pháp xây dựng agent GUI tương tác người - máy thích ứng dựa trên mô hình mã nguồn mở Qwen2-VL-7B và dataset OS-Kairos
 
-3.尝试基于构建的GUI智能体进行推理
-## 1.准备工作
-### 1.1 了解GUI智能体领域的技术路线和研究现状
-阅读教程：[[Slides](https://github.com/Lordog/dive-into-llms/blob/main/documents/chapter8/GUIagent.pdf)]
+3. Thử suy luận dựa trên agent GUI đã xây dựng
+## 1. Chuẩn bị công việc
+### 1.1 Tìm hiểu hướng kỹ thuật và hiện trạng nghiên cứu trong lĩnh vực agent GUI
+Đọc giáo trình: [[Slides](https://github.com/Lordog/dive-into-llms/blob/main/documents/chapter8/GUIagent.pdf)]
 
-### 1.2 了解什么是自适应人机交互GUI智能体
-参考论文：[[Paper](https://arxiv.org/abs/2503.16465)]
+### 1.2 Tìm hiểu agent GUI tương tác người - máy thích ứng là gì
+Bài báo tham khảo: [[Paper](https://arxiv.org/abs/2503.16465)]
 
-### 1.3 数据集准备
-本教程以OS-Kairos为例，基于此工作开源的数据集构建并推理简单的GUI智能体。
+### 1.3 Chuẩn bị dataset
+Giáo trình lấy OS-Kairos làm ví dụ, dựa trên dataset mã nguồn mở của công trình này để xây dựng và suy luận một agent GUI đơn giản.
 
-从[[Data](https://github.com/Wuzheng02/OS-Kairos)]的README.md文件中的下载链接下载数据集，并解压到环境中。
+Tải dataset từ liên kết tải trong tệp README.md của [[Data](https://github.com/Wuzheng02/OS-Kairos)], và giải nén vào môi trường.
 
-数据格式示例如下：
+Ví dụ định dạng dữ liệu như sau:
 ```json
     {
         "task": "打开网易云音乐，搜索《Shape of You》，并播放这首歌。",
@@ -39,15 +39,15 @@
         "success": false
     },
 ```
-### 1.4 模型准备
-从[[Model](https://huggingface.co/Qwen/Qwen2-VL-7B-Instruct)]下载Qwen2-VL-7B模型权重。
+### 1.4 Chuẩn bị mô hình
+Tải trọng số mô hình Qwen2-VL-7B từ [[Model](https://huggingface.co/Qwen/Qwen2-VL-7B-Instruct)].
 
-## 1.5 有监督微调代码准备
-本教程采用LLaMa-Factory对Qwen2-VL-7B进行有监督微调，因此先从[[Code](https://github.com/hiyouga/LLaMA-Factory/)]下载源码。
+## 1.5 Chuẩn bị mã nguồn fine-tuning có giám sát
+Giáo trình dùng LLaMa-Factory để fine-tuning có giám sát Qwen2-VL-7B, vì vậy trước tiên tải mã nguồn từ [[Code](https://github.com/hiyouga/LLaMA-Factory/)].
 
-## 2.GUI智能体构建
-### 2.1 数据预处理
-将以下代码存储为get_sharpgpt.py，并向其填出Kairos_train.json和预计存储处理后的训练集json的路径，然后运行该文件。
+## 2. Xây dựng agent GUI
+### 2.1 Tiền xử lý dữ liệu
+Lưu đoạn mã sau thành get_sharpgpt.py, điền vào đó đường dẫn của Kairos_train.json và đường dẫn dự kiến lưu tệp json của tập huấn luyện sau xử lý, rồi chạy tệp này.
 ```python
 import json
 
@@ -144,10 +144,10 @@ for item in data:
 with open('', 'w', encoding='utf-8') as f:
     json.dump(preprocessed_data, f, ensure_ascii=False, indent=4)
 ```
-经过该步骤，我们将OS-Kairos的训练集成功转化为符合sharpgpt格式的数据，便于进行下一步训练，数据预处理完成。
-## 2.2 有监督微调
-在上一步中，我们已经得到适配LLaMa-Factory训练的格式的Kairos数据集。然后我们要修改LLaMa-Factory以注册数据集和配置训练信息。
-首先修改data/dataset_info.json，添加如下内容注册数据集：
+Sau bước này, chúng ta đã chuyển thành công tập huấn luyện của OS-Kairos thành dữ liệu đúng định dạng sharpgpt, thuận tiện cho bước huấn luyện tiếp theo, hoàn tất tiền xử lý dữ liệu.
+## 2.2 fine-tuning có giám sát
+Ở bước trên, chúng ta đã thu được dataset Kairos có định dạng phù hợp để huấn luyện bằng LLaMa-Factory. Tiếp theo chúng ta cần sửa LLaMa-Factory để đăng ký dataset và cấu hình thông tin huấn luyện.
+Trước tiên sửa data/dataset_info.json, thêm nội dung sau để đăng ký dataset:
 ```json
 "Karios" :{
   "file_name": "Karios_qwenscore.json",
@@ -164,7 +164,7 @@ with open('', 'w', encoding='utf-8') as f:
   }
 },   
 ```
-继续修改/examples/train_full/qwen2vl_full_sft.yaml来进行配置训练信息：
+Tiếp tục sửa /examples/train_full/qwen2vl_full_sft.yaml để cấu hình thông tin huấn luyện:
 ```yaml
 ### model
 model_name_or_path: 
@@ -205,23 +205,23 @@ per_device_eval_batch_size: 1
 eval_strategy: steps
 eval_steps: 20000
 ```
-以上是一个示例配置，model_name_or_path是Qwen2-VL-7B的路径，output_dir是存放断点和log的路径。
-配置好后即可配置推理，示例命令行：
+Trên đây là một cấu hình ví dụ, model_name_or_path là đường dẫn tới Qwen2-VL-7B, output_dir là đường dẫn lưu checkpoint (điểm dừng) và log.
+Sau khi cấu hình xong có thể cấu hình suy luận, dòng lệnh ví dụ:
 ```
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 FORCE_TORCHRUN=1 llamafactory-cli train examples/train_full/qwen2vl_full_sft.yaml
 ```
-此处至少要使用3张80GB的A100计算资源。
+Ở đây cần dùng ít nhất 3 card A100 80GB.
 
-## 3.OS-Kairos推理验证
-训练完毕后，我们即可进行推理，推理也有很多种方法可以选择，可以自行通过transformers库和torch库构建推理代码，也可以采用LLaMa-Factory进行一键式推理，以下演示如何LLaMa-Factory进行一键式推理。
-首先要修改/examples/inference/qwen2_vl.yaml，一个示例如下
+## 3. Kiểm chứng suy luận với OS-Kairos
+Sau khi huấn luyện xong, chúng ta có thể tiến hành suy luận; suy luận cũng có nhiều cách để lựa chọn, có thể tự xây dựng mã suy luận bằng thư viện transformers và torch, cũng có thể dùng LLaMa-Factory để suy luận một cú nhấp. Dưới đây minh họa cách dùng LLaMa-Factory để suy luận một cú nhấp.
+Trước tiên cần sửa /examples/inference/qwen2_vl.yaml, một ví dụ như sau
 ```yaml
 model_name_or_path: 
 template: qwen2_vl
 ```
-其中model_name_or_path是训练后的断点路径。
-然后即可通过
+Trong đó model_name_or_path là đường dẫn checkpoint post-training.
+Sau đó có thể thông qua
 ```
 CUDA_VISIBLE_DEVICES=0 FORCE_TORCHRUN=1 llamafactory-cli webchat examples/inference/qwen2_vl.yaml
 ```
-进行一键式推理，你可以自己拿出OS-Kairos测试集的图片，或者个人手机的截图，结合get_sharpgpt.py中格式的文本prompt输入给智能体，OS-Karios推理后会给出它认为当前应该进行的action和对于这个action的置信度分数。置信度分数越低，则当前指令越超出OS-Kairos的能力边界，需要人类介入来进行人机交互。
+để suy luận một cú nhấp, bạn có thể tự lấy ảnh từ tập kiểm thử OS-Kairos, hoặc ảnh chụp màn hình điện thoại cá nhân, kết hợp với prompt văn bản theo định dạng trong get_sharpgpt.py để đưa vào agent; sau khi suy luận, OS-Karios sẽ đưa ra action mà nó cho là nên thực hiện hiện tại và điểm tin cậy cho action đó. Điểm tin cậy càng thấp thì chỉ thị hiện tại càng vượt quá biên giới năng lực của OS-Kairos, cần con người can thiệp để thực hiện tương tác người - máy.

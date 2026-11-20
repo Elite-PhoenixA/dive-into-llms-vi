@@ -1,32 +1,32 @@
-# 动手学大模型：模型水印
+# Thực hành LLM: Watermark mô hình
 
-导读: 该部分介绍语言模型的水印
+Dẫn đọc: Phần này giới thiệu watermark của mô hình ngôn ngữ
 
-> 在语言模型生成的内容中嵌入人类无法察觉，但却可以被算法检测的到的“水印”。
+> Nhúng vào nội dung do mô hình ngôn ngữ sinh ra một "watermark" mà con người không thể nhận biết, nhưng thuật toán có thể phát hiện được.
 
-## 本教程目标
+## Mục tiêu của giáo trình
 
-1. 水印嵌入：在语言模型生成内容时嵌入水印
-2. 水印检测：检测给定文本的水印强度
-3. 水印评估：评估水印方法的检测性能
-4. 评估水印的鲁棒性（可选）
+1. Nhúng watermark: nhúng watermark khi mô hình ngôn ngữ sinh nội dung
+2. Phát hiện watermark: phát hiện cường độ watermark của một văn bản cho trước
+3. Đánh giá watermark: đánh giá hiệu năng phát hiện của phương pháp watermark
+4. Đánh giá tính bền vững (robustness) của watermark (tùy chọn)
 
 
 
-## 准备工作
+## Chuẩn bị công việc
 
-### 2.1 了解X-SIR代码仓库
+### 2.1 Tìm hiểu kho mã X-SIR
 
 https://github.com/zwhe99/X-SIR
 
-X-SIR仓库包含以下内容的实现
+Kho X-SIR bao gồm phần hiện thực của những nội dung sau
 
-- 三种文本水印算法：X-SIR, SIR和KGW
-- 两种水印去除攻击方法：paraphrase和translation
+- Ba thuật toán watermark văn bản: X-SIR, SIR và KGW
+- Hai phương pháp tấn công loại bỏ watermark: paraphrase và translation
 
 ![img](./assets/x-sir.png)
 
-### 2.2 环境准备
+### 2.2 Chuẩn bị môi trường
 
 ```Shell
 git clone https://github.com/zwhe99/X-SIR && cd X-SIR
@@ -36,17 +36,17 @@ pip3 install -r requirements.txt
 # [optional] pip3 install flash-attn==2.3.3
 ```
 
-> requirements.txt里的版本均为建议版本，并非强制要求。
+> Các phiên bản trong requirements.txt đều là phiên bản đề xuất, không phải yêu cầu bắt buộc.
 
 
 
-## 实操案例
+## Ví dụ thực hành
 
-> 使用KGW算法在语言模型生成内容中嵌入水印
+> Dùng thuật toán KGW để nhúng watermark vào nội dung do mô hình ngôn ngữ sinh ra
 
-### 3.1 数据准备
+### 3.1 Chuẩn bị dữ liệu
 
-将待输入给语言模型的提示（prompt）组织成jsonl文件：
+Tổ chức các gợi ý (prompt) cần đưa vào mô hình ngôn ngữ thành tệp jsonl:
 
 ```JSON
 {"prompt": "Ghost of Emmett Till: Based on Real Life Events "}
@@ -55,12 +55,12 @@ pip3 install -r requirements.txt
 ......
 ```
 
-- 每行是一个json object，并至少包含名为“prompt”的键
-- 后续内容以`data/dataset/mc4/mc4.en.jsonl`文件为例。此文件一共包含500条数据，如果觉得模型处理时间过长，可以考虑自行缩减数据。
+- Mỗi dòng là một json object, và phải chứa ít nhất khóa tên là "prompt"
+- Nội dung tiếp theo lấy tệp `data/dataset/mc4/mc4.en.jsonl` làm ví dụ. Tệp này gồm tổng cộng 500 mục dữ liệu, nếu thấy mô hình xử lý quá lâu, có thể tự rút gọn dữ liệu.
 
-### 3.2 水印嵌入
+### 3.2 Nhúng watermark
 
-- 选择模型和水印算法。这里我们选择`baichuan-inc/Baichuan-7B`模型，以及`KGW`水印算法
+- Chọn mô hình và thuật toán watermark. Ở đây chúng ta chọn mô hình `baichuan-inc/Baichuan-7B` và thuật toán watermark `KGW`
 
   - ```Shell
     MODEL_NAME=baichuan-inc/Baichuan-7B
@@ -68,7 +68,7 @@ pip3 install -r requirements.txt
     WATERMARK_METHOD_FLAG="--watermark_method kgw"
     ```
 
-- 生成内容，并嵌入水印
+- Sinh nội dung và nhúng watermark
 
   - ```Shell
     python3 gen.py \
@@ -80,9 +80,9 @@ pip3 install -r requirements.txt
         $WATERMARK_METHOD_FLAG
     ```
 
-  - 此命令将模型生成的内容保存至输出文件：`gen/$MODEL_ABBR/kgw/mc4.en.mod.jsonl`
+  - Lệnh này lưu nội dung do mô hình sinh ra vào tệp đầu ra: `gen/$MODEL_ABBR/kgw/mc4.en.mod.jsonl`
 
-  - 输出文件的格式如下，其中response为模型的输出内容：
+  - Định dạng tệp đầu ra như sau, trong đó response là nội dung đầu ra của mô hình:
 
     - ```JSON
       {"prompt": "Ghost of Emmett Till: Based on Real Life Events ", "response": ".In August if 1955 African American Emmett Louis Till (21)\nThe second part of The Man From Waco, about Dan Millers trial for murdering his friend Michael Capps in a Texas wiener wrastle as I believe the statute says called it then; back at that time that would have surely occurred since Dan kept his pistol in one of those watery doggy bags he keeps around to clean himself with after emptying can into a nearby lake just minutes before committing his crime. If what we read is true thats exactly where Dan left his stolen gun and later used it in the robbery gone wrong which killed two innocent boys when his own accomplice got into an argument over not being paid enough therefore wanting out. This angered Miller whos history of mental instability could be taken one way or another but this criminal act was unavoidable once they entered FBIs hands and some other very powerful law officers who were involved either directly"}
@@ -93,11 +93,11 @@ pip3 install -r requirements.txt
 
 
 
-### 3.3 水印检测
+### 3.3 Phát hiện watermark
 
-> 水印检测即给定一段文本，计算该段文本的水印强度（z-score）。
+> Phát hiện watermark tức là cho trước một đoạn văn bản, tính cường độ watermark (z-score) của đoạn văn bản đó.
 
-- 计算**有水印**文本的水印强度
+- Tính cường độ watermark của văn bản **có watermark**
 
   - ```python
     python3 detect.py \
@@ -107,7 +107,7 @@ pip3 install -r requirements.txt
         $WATERMARK_METHOD_FLAG
     ```
 
-- 计算**无水印**文本的水印强度
+- Tính cường độ watermark của văn bản **không có watermark**
 
   - ```python
     python3 detect.py \
@@ -117,7 +117,7 @@ pip3 install -r requirements.txt
         $WATERMARK_METHOD_FLAG
     ```
 
-- 输出的文件格式为：
+- Định dạng tệp đầu ra là:
 
   - ```JSON
     {"z_score": 12.105422509165574, "prompt": "Ghost of Emmett Till: Based on Real Life Events ", "response": ".In August if 1955 African American Emmett Louis Till (21)\nThe second part of The Man From Waco, about Dan Millers trial for murdering his friend Michael Capps in a Texas wiener wrastle as I believe the statute says called it then; back at that time that would have surely occurred since Dan kept his pistol in one of those watery doggy bags he keeps around to clean himself with after emptying can into a nearby lake just minutes before committing his crime. If what we read is true thats exactly where Dan left his stolen gun and later used it in the robbery gone wrong which killed two innocent boys when his own accomplice got into an argument over not being paid enough therefore wanting out. This angered Miller whos history of mental instability could be taken one way or another but this criminal act was unavoidable once they entered FBIs hands and some other very powerful law officers who were involved either directly", "biases": null}
@@ -126,12 +126,12 @@ pip3 install -r requirements.txt
     ......
     ```
 
-- 肉眼查看一下两个文件水印强度的区别
+- Quan sát bằng mắt thường sự khác biệt về cường độ watermark giữa hai tệp
 
-### 3.4 水印评估
+### 3.4 Đánh giá watermark
 <a name="eval"></a>
 
-- 输入水印检测的z-score文件，计算检测准确度，绘制ROC曲线
+- Đưa vào tệp z-score của phát hiện watermark, tính độ chính xác phát hiện, vẽ đường cong ROC
 
   - ```Shell
     python3 eval_detection.py \
@@ -150,25 +150,25 @@ pip3 install -r requirements.txt
 
 ![img](./assets/curve.png)
 
-## 评估水印的鲁棒性（可选）
+## Đánh giá tính bền vững của watermark (tùy chọn)
 
-> 对水印文本进行paraphrase和translation攻击后，重新评估其检测效果
+> Sau khi tấn công paraphrase và translation lên văn bản có watermark, đánh giá lại hiệu quả phát hiện của nó
 
-### 4.1 准备工作
+### 4.1 Chuẩn bị công việc
 
-我们使用gpt-3.5-turbo-1106模型对水印文本进行paraphrase和translation。也可以自行选择其它工具。
+Chúng ta dùng mô hình gpt-3.5-turbo-1106 để thực hiện paraphrase và translation trên văn bản có watermark. Cũng có thể tự chọn công cụ khác.
 
-- 设置openai的apikey
+- Thiết lập apikey của openai
 
   - ```Shell
     export OPENAI_API_KEY=xxxx
     ```
 
-- 修改`attack/const.py`中的RPM (requests per min) and TPM (tokens per min)
+- Sửa RPM (requests per min) và TPM (tokens per min) trong `attack/const.py`
 
-### 4.2 进行攻击（以翻译为例）
+### 4.2 Thực hiện tấn công (lấy dịch làm ví dụ)
 
-- 将水印文本翻译成中文
+- Dịch văn bản có watermark sang tiếng Trung
 
   - ```Shell
     python3 attack/translate.py \
@@ -179,14 +179,14 @@ pip3 install -r requirements.txt
         --tgt_lang zh
     ```
 
-- 重新评估
+- Đánh giá lại
 
-  -  见[3.4](#eval)
+  -  Xem [3.4](#eval)
 
-- 比较攻击前后水印性能的变化
+- So sánh sự thay đổi hiệu năng watermark trước và sau khi tấn công
 
 
 
-## 进阶练习
+## Bài tập nâng cao
 
-- 查看[X-SIR](https://github.com/zwhe99/X-SIR)文档，学习使用其它两种（X-SIR，SIR）算法，并评估其在不同攻击方法下的性能
+- Xem tài liệu [X-SIR](https://github.com/zwhe99/X-SIR), học cách sử dụng hai thuật toán còn lại (X-SIR, SIR), và đánh giá hiệu năng của chúng dưới các phương pháp tấn công khác nhau

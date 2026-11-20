@@ -1,0 +1,23 @@
+== documents/chapter1/dive-into-llm.pdf
+documents/chapter1/dive-into-llm.pdf -> documents/chapter1/dive-into-llm.vi.pdf | {'pages': 77, 'units': 618, 'translated': 579, 'overflow': 0} | 11.0s
+== documents/chapter2/dive-into-prompting.pdf
+documents/chapter2/dive-into-prompting.pdf -> documents/chapter2/dive-into-prompting.vi.pdf | {'pages': 76, 'units': 507, 'translated': 505, 'overflow': 0} | 12.9s
+== documents/chapter3/dive_edit_0410.pdf
+documents/chapter3/dive_edit_0410.pdf -> documents/chapter3/dive_edit_0410.vi.pdf | {'pages': 21, 'units': 76, 'translated': 73, 'overflow': 0} | 1.0s
+== documents/chapter4/math.pdf
+documents/chapter4/math.pdf -> documents/chapter4/math.vi.pdf | {'pages': 17, 'units': 102, 'translated': 100, 'overflow': 0} | 2.9s
+== documents/chapter5/watermark.pdf
+documents/chapter5/watermark.pdf -> documents/chapter5/watermark.vi.pdf | {'pages': 48, 'units': 400, 'translated': 316, 'overflow': 22} | 10.9s
+== documents/chapter6/dive-Jailbreak.pdf
+documents/chapter6/dive-Jailbreak.pdf -> documents/chapter6/dive-Jailbreak.vi.pdf | {'pages': 44, 'units': 784, 'translated': 532, 'overflow': 0} | 115.2s
+== documents/chapter7/stega.pdf
+documents/chapter7/stega.pdf -> documents/chapter7/stega.vi.pdf | {'pages': 13, 'units': 36, 'translated': 36, 'overflow': 0} | 4.1s
+== documents/chapter8/mllms.pdf
+documents/chapter8/mllms.pdf -> documents/chapter8/mllms.vi.pdf | {'pages': 81, 'units': 657, 'translated': 556, 'overflow': 0} | 123.8s
+== documents/chapter9/GUIagent.pdf
+documents/chapter9/GUIagent.pdf -> documents/chapter9/GUIagent.vi.pdf | {'pages': 43, 'units': 244, 'translated': 241, 'overflow': 0} | 100.6s
+== documents/chapter10/dive-into-safety.pdf
+documents/chapter10/dive-into-safety.pdf -> documents/chapter10/dive-into-safety.vi.pdf | {'pages': 51, 'units': 516, 'translated': 515, 'overflow': 20} | 195.6s
+== documents/chapter11/RLHF.pdf
+documents/chapter11/RLHF.pdf -> documents/chapter11/RLHF.vi.pdf | {'pages': 24, 'units': 116, 'translated': 107, 'overflow': 0} | 56.4s
+ALLDONE

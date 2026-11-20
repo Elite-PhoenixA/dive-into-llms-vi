@@ -1,49 +1,49 @@
-# Thực hành mô hình lớn: RLHF
+# 动手学大模型：RLHF
 
-> Sổ tay thí nghiệm này được dịch và tổng hợp từ tài liệu trên mạng [blog](https://newfacade.github.io/notes-on-reinforcement-learning/17-ppo-trl.html) & [trl examples](https://github.com/huggingface/trl/blob/main/examples/notebooks/gpt2-sentiment.ipynb)
+> 本实验手册翻译并整合了网络资料 [blog](https://newfacade.github.io/notes-on-reinforcement-learning/17-ppo-trl.html) & [trl examples](https://github.com/huggingface/trl/blob/main/examples/notebooks/gpt2-sentiment.ipynb)
 
-Cấu hình tái hiện thí nghiệm: một card NVDIA A800-SXM4-80GB, chiếm dụng 10097MiB, thời gian huấn luyện 35min19s.
+复现实验配置：单卡 NVDIA A800-SXM4-80GB 占用 10097MiB，训练耗时 35min19s。
 
-Đọc giáo trình: [slide](./RLHF.pdf)
+阅读教程：[slide](./RLHF.pdf)
 
-notebook: [notebook](./RLHF.ipynb)
+notebook：[notebook](./RLHF.ipynb)
 
-## PPO hoạt động như thế nào
-1. Rollout: mô hình ngôn ngữ sinh phản hồi dựa trên query.
-2. Evaluation: truy vấn và phản hồi được đánh giá bằng hàm, mô hình, phản hồi của con người hoặc một tổ hợp nào đó của chúng. Quá trình này nên sinh ra một **giá trị vô hướng** cho mỗi cặp truy vấn/phản hồi.
-3. Optimization: trong bước tối ưu, cặp truy vấn/phản hồi được dùng để tính log xác suất của các token trong chuỗi. Việc này được thực hiện thông qua mô hình đang huấn luyện và mô hình tham chiếu. Phân kỳ KL giữa hai đầu ra được dùng làm tín hiệu phần thưởng bổ sung, nhằm đảm bảo phản hồi sinh ra không lệch quá xa mô hình ngôn ngữ tham chiếu. Sau đó dùng PPO để huấn luyện mô hình ngôn ngữ chủ động.
+## PPO 如何运作
+1. Rollout：语言模型根据 query 生成响应。
+2. Evaluation：查询和响应使用函数、模型、人工反馈或它们的某种组合进行评估。此过程应为每个查询/响应对生成一个**标量值**。
+3. Optimization：在优化步骤中，查询/响应对用于计算序列中标记的对数概率。这是通过训练的模型和参考模型完成的。两个输出之间的 KL 散度用作额外的奖励信号，以确保生成的响应不会偏离参考语言模型太远。然后使用 PPO 训练主动语言模型。
 <div style="text-align: center">
 <img src='figs/trl1.png' width='600'>
-<p style="text-align: center;"> <b>Hình:</b> lưu đồ PPO </p>
+<p style="text-align: center;"> <b>图:</b> PPO 流程图 </p>
 </div>
 
-# Tinh chỉnh GPT-2 để sinh bình luận tích cực  
-> Bằng việc dùng bộ phân loại cảm xúc BERT làm hàm phần thưởng, tối ưu GPT-2 để sinh các bình luận phim IMDB tích cực.
+# 微调 GPT-2 以生成积极评论  
+> 通过使用 BERT 情感分类器作为奖励函数，优化 GPT-2 以生成积极的 IMDB 电影评论。
 
 <div style="text-align: center">
 <img src='figs/gpt2_bert_training.png' width='600'>
-<p style="text-align: center;"> <b>Hình:</b> thiết lập thí nghiệm tinh chỉnh GPT-2</p>
+<p style="text-align: center;"> <b>图：</b> 微调 GPT-2 的实验设置</p>
 </div>
 
-Chúng tôi tinh chỉnh GPT-2 để sinh bình luận phim tích cực dựa trên bộ dữ liệu IMDB. Mô hình sẽ nhận phần mở đầu của bình luận thật, và cần sinh phần tiếp theo tích cực. Để thưởng cho phần tiếp theo tích cực, chúng tôi dùng bộ phân loại BERT để phân tích cảm xúc của câu được sinh ra, và lấy đầu ra của bộ phân loại làm tín hiệu phần thưởng cho huấn luyện PPO.
+我们微调 GPT-2 以基于 IMDB 数据集生成积极的电影评论。该模型会接收真实评论的开头部分，并需要生成积极的后续内容。为了奖励积极的后续内容，我们使用 BERT 分类器来分析生成句子的情感，并将分类器的输出作为 PPO 训练的奖励信号。
 
-## Thiết lập thí nghiệm
+## 实验设置
 
-### Tải mô hình và dữ liệu
-Bộ dữ liệu
+### 下载模型和数据
+数据集
 ```bash
 export HF_ENDPOINT=https://hf-mirror.com; huggingface-cli download --resume-download stanfordnlp/imdb --local-dir dataset/imdb --repo-type dataset
 ```
-Mô hình tham chiếu
+参考模型
 ```bash
 export HF_ENDPOINT=https://hf-mirror.com; huggingface-cli download --resume-download lvwerra/gpt2-imdb --local-dir model/gpt2-imdb
 ```
-Mô hình phần thưởng
+奖励模型
 ```bash
 export HF_ENDPOINT=https://hf-mirror.com; huggingface-cli download --resume-download lvwerra/distilbert-imdb --local-dir model/distilbert-imdb
 ```
 
-### Import các gói phụ thuộc
+### 导入依赖项
 
 
 ```python
@@ -67,7 +67,7 @@ from trl import PPOTrainer, PPOConfig, AutoModelForCausalLMWithValueHead
 from trl.core import LengthSampler
 ```
 
-### Cấu hình
+### 配置
 
 
 ```python
@@ -87,12 +87,12 @@ import wandb
 wandb.init()
 ```
 
-Bạn có thể thấy chúng tôi đã nạp một mô hình GPT-2 tên là `gpt2_imdb`. Mô hình này được tinh chỉnh thêm 1 epoch trên bộ dữ liệu IMDB, sử dụng [script](https://github.com/huggingface/transformers/blob/main/examples/legacy/run_language_modeling.py) của Hugging Face (không có thiết lập đặc biệt). Các tham số còn lại chủ yếu lấy từ bài báo gốc 《[Fine-Tuning Language Models from Human Preferences](https://huggingface.co/papers/1909.08593)》. Mô hình này cùng mô hình BERT đều có thể tìm thấy trong kho mô hình của Hugging Face, liên kết cụ thể tại [đây](https://huggingface.co/models).
+你可以看到我们加载了一个名为 `gpt2_imdb` 的 GPT-2 模型。该模型在 IMDB 数据集上额外微调了 1 个 epoch，使用的是 Hugging Face 的[脚本](https://github.com/huggingface/transformers/blob/main/examples/legacy/run_language_modeling.py)（无特殊设置）。其余参数主要取自原始论文《[Fine-Tuning Language Models from Human Preferences](https://huggingface.co/papers/1909.08593)》。该模型以及 BERT 模型均可在 Hugging Face 的模型库中获取，具体链接在[这里](https://huggingface.co/models)。
 
-## Nạp dữ liệu và mô hình
+## 加载数据和模型
 
-### Nạp bộ dữ liệu IMDB  
-Bộ dữ liệu IMDB gồm 50.000 bình luận phim, được gán nhãn cảm xúc "tích cực"/"tiêu cực". Chúng tôi nạp bộ dữ liệu IMDB vào một DataFrame, và lọc ra các bình luận có ít nhất 200 ký tự. Sau đó, chúng tôi phân tách (tokenize) từng văn bản, và dùng `LengthSampler` để cắt ngẫu nhiên thành độ dài chỉ định.
+### 加载 IMDB 数据集  
+IMDB 数据集包含了 50,000 条电影评论，并标注了“积极”/“消极”的情感反馈。我们将 IMDB 数据集加载到一个 DataFrame 中，并筛选出至少 200 个字符的评论。然后，我们对每条文本进行分词，并使用 `LengthSampler` 将其随机截断为指定长度。
 
 
 ```python
@@ -142,8 +142,8 @@ def collator(data):
     return dict((key, [d[key] for d in data]) for key in data[0])
 ```
 
-### Nạp mô hình ngôn ngữ GPT2 đã tiền huấn luyện
-Chúng tôi nạp mô hình GPT2 có value head (đầu giá trị) và tokenizer. Chúng tôi nạp mô hình hai lần; mô hình thứ nhất dùng để tối ưu, còn mô hình thứ hai làm tham chiếu, dùng để tính phân kỳ KL (KL-divergence) so với điểm ban đầu. Điều này đóng vai trò tín hiệu phần thưởng bổ sung trong huấn luyện PPO, nhằm đảm bảo mô hình sau tối ưu không lệch quá xa mô hình ngôn ngữ gốc.
+### 加载预训练的 GPT2 语言模型
+我们加载带有值头（value head）的 GPT2 模型和分词器。我们加载了两次模型；第一个模型用于优化，而第二个模型作为参考，用于计算与初始点的 KL 散度（KL-divergence）。这在 PPO 训练中作为额外的奖励信号，以确保优化后的模型不会偏离原始语言模型太远。
 
 
 ```python
@@ -154,8 +154,8 @@ tokenizer = AutoTokenizer.from_pretrained(config.model_name)
 tokenizer.pad_token = tokenizer.eos_token
 ```
 
-### Khởi tạo PPOTrainer  
-`PPOTrainer` chịu trách nhiệm phân bổ thiết bị và tối ưu ở các bước sau:
+### 初始化 PPOTrainer  
+`PPOTrainer` 负责后续的设备分配和优化：
 
 
 ```python
@@ -165,8 +165,8 @@ ppo_trainer = PPOTrainer(
 ```
 
 
-### Nạp bộ phân loại BERT  
-Chúng tôi nạp một bộ phân loại BERT đã được tinh chỉnh trên bộ dữ liệu IMDB.
+### 加载 BERT 分类器  
+我们加载了一个在 IMDB 数据集上微调过的 BERT 分类器。
 
 
 ```python
@@ -181,7 +181,7 @@ sentiment_pipe = pipeline(
     Device set to use cuda:0
 
 
-Mô hình xuất ra logits của lớp tiêu cực và lớp tích cực. Chúng tôi sẽ dùng logits của lớp tích cực làm tín hiệu phần thưởng cho mô hình ngôn ngữ.
+模型输出的是负面类和正面类的 logits。我们将使用正面类的 logits 作为语言模型的奖励信号。
 
 
 ```python
@@ -211,8 +211,8 @@ sentiment_pipe(text, **sent_kwargs)
 
 
 
-### Thiết lập sinh  
-Đối với việc sinh phản hồi, chúng tôi chỉ dùng phương pháp lấy mẫu, đảm bảo tắt top-k và lấy mẫu hạt nhân (nucleus sampling), đồng thời đặt một độ dài tối thiểu.
+### 生成设置  
+对于响应生成，我们仅使用采样方法，并确保关闭 top-k 和核采样（nucleus sampling），同时设置一个最小长度。
 
 
 ```python
@@ -225,14 +225,14 @@ gen_kwargs = {
 }
 ```
 
-## Tối ưu mô hình
+## 优化模型
 
-### Vòng huấn luyện
+### 训练循环
 
-Vòng huấn luyện gồm các bước chính sau:
-1. Lấy phản hồi cho truy vấn từ mạng chính sách (GPT-2)  
-2. Lấy cảm xúc của cặp truy vấn/phản hồi từ BERT  
-3. Dùng PPO tối ưu chính sách, sử dụng bộ ba (truy vấn, phản hồi, phần thưởng)  
+训练循环包括以下主要步骤：
+1. 从策略网络（GPT-2）中获取查询响应  
+2. 从 BERT 中获取查询/响应的情感  
+3. 使用 PPO 优化策略，利用（查询、响应、奖励）三元组  
 
 
 ```python
@@ -284,16 +284,16 @@ for epoch, batch in enumerate(tqdm(ppo_trainer.dataloader)):
     100%|██████████| 194/194 [35:19<00:00, 10.92s/it]
 
 
-### Tiến độ huấn luyện  
-Nếu bạn đang dùng Weights & Biases để theo dõi tiến độ huấn luyện, bạn sẽ thấy đường cong tương tự hình dưới đây. Xem báo cáo ví dụ tương tác trên wandb.ai: [liên kết](https://wandb.ai/huggingface/trl/runs/w9l3110g).  
+### 训练进展  
+如果你正在使用 Weights & Biases 跟踪训练进展，你应该会看到类似于下图的曲线。查看 wandb.ai 上的交互式示例报告：[链接](https://wandb.ai/huggingface/trl/runs/w9l3110g)。  
 <div style="text-align: center">
 <img src='figs/gpt2_tuning_progress.png' width='800'>
-<p style="text-align: center;"> <b>Hình:</b> diễn biến giá trị phần thưởng trung bình trong quá trình huấn luyện </p>
+<p style="text-align: center;"> <b>图：</b> 训练期间奖励均值的演变 </p>
 </div>  
-Có thể quan sát thấy rằng, sau vài bước tối ưu, mô hình bắt đầu sinh ra đầu ra tích cực hơn.  
+可以观察到，经过几次优化步骤后，模型开始生成更积极的输出。  
 
-## Kiểm tra mô hình  
-Hãy cùng kiểm tra một số ví dụ từ bộ dữ liệu IMDB. Chúng ta có thể dùng `ref_model` để so sánh mô hình sau tối ưu `model` với mô hình trước tối ưu.
+## 模型检查  
+让我们从 IMDB 数据集中检查一些示例。我们可以使用 `ref_model` 来比较优化后的模型 `model` 与优化前的模型。
 
 
 ```python
@@ -502,7 +502,7 @@ df_results
 </table>
 
 
-Qua quan sát giá trị trung bình/trung vị phần thưởng của các chuỗi được sinh ra, chúng tôi phát hiện sự khác biệt rõ rệt.
+通过观察生成序列的奖励均值/中位数，我们发现了显著的差异。
 
 
 ```python
@@ -528,8 +528,8 @@ display(df_results[["rewards (before)", "rewards (after)"]].median())
     dtype: float64
 
 
-## Lưu mô hình  
-Cuối cùng, chúng tôi lưu mô hình để dùng về sau.
+## 保存模型  
+最后，我们保存模型以供后续使用。
 
 
 ```python
@@ -546,3 +546,4 @@ tokenizer.save_pretrained("model/gpt2-imdb-pos-v2")
      'model/gpt2-imdb-pos-v2/merges.txt',
      'model/gpt2-imdb-pos-v2/added_tokens.json',
      'model/gpt2-imdb-pos-v2/tokenizer.json')
+

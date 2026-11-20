@@ -1,42 +1,42 @@
-# LLM数学推理
-本项目实现了让大规模语言模型（LLM）学习数学推理的代码，主要技术为使用Supervised Finetuning（SFT）来让模型学习DeepSeek-R1生成的回复，从中学习复杂的数学推理技能（如反思、验算等）。
-本实验基于[DeepMath-103K](https://huggingface.co/datasets/zwhe99/DeepMath-103K)数据集以及[Qwen/Qwen2.5-Math-1.5B](https://huggingface.co/Qwen/Qwen2.5-Math-1.5B)模型，带领读者初步尝试在数学任务上的数据蒸馏全流程。
+# Suy luận toán học với LLM
+Dự án này hiện thực mã nguồn giúp mô hình ngôn ngữ quy mô lớn (LLM) học suy luận toán học, kỹ thuật chính là dùng Supervised Finetuning (SFT) để mô hình học các phản hồi do DeepSeek-R1 sinh ra, từ đó học được các kỹ năng suy luận toán học phức tạp (như tự phản tư, kiểm tra lại phép tính, v.v.).
+Thí nghiệm này dựa trên dataset [DeepMath-103K](https://huggingface.co/datasets/zwhe99/DeepMath-103K) và mô hình [Qwen/Qwen2.5-Math-1.5B](https://huggingface.co/Qwen/Qwen2.5-Math-1.5B), dẫn dắt người đọc bước đầu thử nghiệm toàn bộ quy trình distillation dữ liệu trên tác vụ toán học.
 
-## 实验目的
-- 了解数学相关的数据集的清理和预处理
-- 了解微调大模型的基本方法
-- 了解使用大模型进行推理的基本方法
-- 了解评测模型数学能力的基本方法
+## Mục đích thí nghiệm
+- Hiểu việc làm sạch và tiền xử lý các dataset liên quan đến toán học
+- Hiểu phương pháp cơ bản để fine-tuning LLM
+- Hiểu phương pháp cơ bản để dùng LLM thực hiện suy luận
+- Hiểu phương pháp cơ bản để đánh giá năng lực toán học của mô hình
 
-## 环境要求
+## Yêu cầu môi trường
 
 - Python 3.8+
 - PyTorch
 - Transformers
 - Datasets
 - vllm
-- 至少40GB显存的GPU
+- GPU có ít nhất 40GB bộ nhớ hiển thị
 
-## 实验文档
+## Tài liệu thí nghiệm
 
-1. 打开Jupyter notebook：
+1. Mở Jupyter notebook:
 ```bash
 jupyter notebook sft_math.ipynb
 ```
 
-2. notebook包含几个主要部分：
-   - 数据集下载以及预处理
-   - 模型加载、训练
-   - 模型生成、评测
+2. Notebook bao gồm một số phần chính:
+   - Tải và tiền xử lý dataset
+   - Nạp mô hình, huấn luyện
+   - Sinh kết quả bằng mô hình, đánh giá
 
-3. 具体操作和说明请参考notebook。
+3. Thao tác và hướng dẫn cụ thể vui lòng tham khảo notebook.
 
-## 输出文件
+## Tệp đầu ra
 
-训练过程会产生训练的checkpoint文件，生成完成后会保存生成结果。
+Quá trình huấn luyện sẽ sinh ra các tệp checkpoint của huấn luyện, sau khi sinh xong sẽ lưu kết quả sinh.
 
-## 注意事项
+## Lưu ý
 
-- 模型和数据需要从huggingface加载，国内可以通过https://hf-mirror.com 镜像进行下载。
-- 确保有足够的磁盘空间保存原始模型文件、数据文件以及训练后的checkpoint(请预留至少50GB空间)
-- 需要使用至少40GB显存的GPU显卡
+- Mô hình và dữ liệu cần được tải từ huggingface, trong nước có thể tải qua mirror https://hf-mirror.com.
+- Đảm bảo có đủ dung lượng ổ đĩa để lưu tệp mô hình gốc, tệp dữ liệu và checkpoint post-training (vui lòng dự trữ ít nhất 50GB).
+- Cần dùng GPU có ít nhất 40GB bộ nhớ hiển thị.
